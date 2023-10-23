@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface CuisinesRegistry {
 
-    void register(Customer customer, Cuisine cuisine);
+  void register(Customer customer, Cuisine cuisine);
 
-    List<Cuisine> customerCuisines(Customer customer);
+  List<Cuisine> customerCuisines(Customer customer);
 
-    List<Cuisine> topCuisines(int n);
+  List<Cuisine> topCuisines(int n);
 
-    List<Customer> cuisineCustomers(Cuisine cuisine);
+  List<Customer> cuisineCustomers(Cuisine cuisine);
 }
