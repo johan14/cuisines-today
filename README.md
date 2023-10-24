@@ -22,3 +22,9 @@ It is ok to change any code as long as the CuisinesRegistry interface remains un
 + Put the write up mentioned in point 4. into the end of this file.
 + Share the project with gitlab user *quandoo_recruitment_task* (go to `Settings -> Members -> Invite member`, find the user in `Select members to invite` and set `Choose a role permission` to `Developer`)
 + Send us an **ssh** clone link to the repository.
+
+## Scaling 
+
++ Fistly I would consider using external in-memory caching tools like **Redis**. A high-availability Redis cluster would be a great solution for caching since I would assume the data access rate would be very high. 
++ Secondly I would think about **horizontal scaling** the java component where the load can be distributed. 
++ In order for the java component processing to be as fast as possible and unblocking, I would consider an **event driven design**, in particular reactive frameworks and libraries(`Reactor project, RxJava, Akka` etc) and external tools such as messaging queues (`Kafka`, etc).
