@@ -5,12 +5,12 @@ import de.quandoo.recruitment.registry.model.Cuisine;
 import de.quandoo.recruitment.registry.model.Customer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -19,7 +19,7 @@ public class InMemoryCuisinesRegistry implements CuisinesRegistry {
   private static final Logger LOGGER = Logger.getLogger(InMemoryCuisinesRegistry.class.getName());
 
   // Structure for accessing and adding cuisines or customers
-  private static final Map<Cuisine, Set<Customer>> cuisineSetMap = new HashMap<>();
+  private static final Map<Cuisine, Set<Customer>> cuisineSetMap = new ConcurrentHashMap<>();
 
   // Structure for ordering cuisine based on customers number
   private static final Set<Cuisine> sortedSet = new TreeSet<>(
@@ -45,7 +45,8 @@ public class InMemoryCuisinesRegistry implements CuisinesRegistry {
       return;
     }
     Set<Customer> customerSet = cuisineSetMap.computeIfAbsent(cuisine, k -> new HashSet<>());
-    LOGGER.info(String.format("Added customer %s to cuisine %s", customer.getUuid(), cuisine.getName().getValue()));
+    LOGGER.info(String.format("Added customer %s to cuisine %s", customer.getUuid(),
+        cuisine.getName().getValue()));
 
     if (customerSet.add(customer)) {
       // Customer was added, update counts
