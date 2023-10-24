@@ -1,37 +1,124 @@
 package de.quandoo.recruitment.registry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import de.quandoo.recruitment.registry.model.Cuisine;
+import de.quandoo.recruitment.registry.model.CuisinesEnum;
 import de.quandoo.recruitment.registry.model.Customer;
+import java.util.UUID;
+import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class InMemoryCuisinesRegistryTest {
 
-    private InMemoryCuisinesRegistry cuisinesRegistry = new InMemoryCuisinesRegistry();
+  final InMemoryCuisinesRegistry cuisinesRegistry = new InMemoryCuisinesRegistry();
 
-    @Test
-    public void shouldWork1() {
-        cuisinesRegistry.register(new Customer("1"), new Cuisine("french"));
-        cuisinesRegistry.register(new Customer("2"), new Cuisine("german"));
-        cuisinesRegistry.register(new Customer("3"), new Cuisine("italian"));
+  @Before
+  public void cleanStateInitialization() {
+    cuisinesRegistry.getCuisineSetMap().clear();
+    cuisinesRegistry.getSortedSet().clear();
+  }
 
-        cuisinesRegistry.cuisineCustomers(new Cuisine("french"));
-    }
+  @Test
+  public void givenValidCuisineAndValidCustomer_whenRegisteringCustomerToCuisine_thenAddSuccessfully() {
 
-    @Test
-    public void shouldWork2() {
-        cuisinesRegistry.cuisineCustomers(null);
-    }
+    Customer customer = new Customer(UUID.randomUUID());
+    Cuisine cuisine = new Cuisine(CuisinesEnum.FRENCH);
 
-    @Test
-    public void shouldWork3() {
-        cuisinesRegistry.customerCuisines(null);
-    }
+    cuisinesRegistry.register(customer, cuisine);
 
-    @Test(expected = RuntimeException.class)
-    public void thisDoesntWorkYet() {
-        cuisinesRegistry.topCuisines(1);
-    }
+    assertTrue(cuisinesRegistry.getCuisineSetMap().containsKey(cuisine));
+    assertEquals(1, cuisinesRegistry.getCuisineSetMap().get(cuisine).size());
+  }
+
+  @Test
+  public void givenInValidCuisineAndInValidCustomer_whenRegisteringCustomerToCuisine_thenHandleWarning() {
+
+    cuisinesRegistry.register(null, null);
+
+    assertEquals(0, cuisinesRegistry.getCuisineSetMap().size());
+  }
+
+  @Test
+  public void givenRegisteredCuisineAndCustomers_whenRetrievingCustomersOfOneCuisine_thenReturnListOfCustomers() {
+
+    Customer customer1 = new Customer(UUID.randomUUID());
+    Customer customer2 = new Customer(UUID.randomUUID());
+    Cuisine cuisine = new Cuisine(CuisinesEnum.FRENCH);
+
+    cuisinesRegistry.register(customer1, cuisine);
+    cuisinesRegistry.register(customer2, cuisine);
+
+    assertTrue(cuisinesRegistry.getCuisineSetMap().containsKey(cuisine));
+    assertEquals(2, cuisinesRegistry.cuisineCustomers(cuisine).size());
+    assertTrue(cuisinesRegistry.cuisineCustomers(cuisine).contains(customer1));
+    assertTrue(cuisinesRegistry.cuisineCustomers(cuisine).contains(customer2));
+  }
+
+  @Test
+  public void givenRegisteredCuisineAndCustomers_whenRetrievingCustomersOfInValidCuisine_thenHandleWarning() {
+
+    Customer customer1 = new Customer(UUID.randomUUID());
+    Customer customer2 = new Customer(UUID.randomUUID());
+    Cuisine cuisine = new Cuisine(CuisinesEnum.FRENCH);
+
+    cuisinesRegistry.register(customer1, cuisine);
+    cuisinesRegistry.register(customer2, cuisine);
+
+    assertEquals(0, cuisinesRegistry.cuisineCustomers(null).size());
+    assertEquals(0, cuisinesRegistry.cuisineCustomers(new Cuisine(CuisinesEnum.ITALIAN)).size());
+  }
+
+  @Test
+  public void givenRegisteredCuisinesAndCustomers_whenRetrievingCuisinesOfOneCustomer_thenReturnListOfCuisines() {
+
+    Customer customer1 = new Customer(UUID.randomUUID());
+    Customer customer2 = new Customer(UUID.randomUUID());
+    Cuisine frenchCuisine = new Cuisine(CuisinesEnum.FRENCH);
+    Cuisine germanCuisine = new Cuisine(CuisinesEnum.GERMAN);
+
+    cuisinesRegistry.register(customer1, frenchCuisine);
+    cuisinesRegistry.register(customer1, germanCuisine);
+    cuisinesRegistry.register(customer2, frenchCuisine);
+
+    assertEquals(2, cuisinesRegistry.customerCuisines(customer1).size());
+    assertTrue(cuisinesRegistry.customerCuisines(customer1).contains(frenchCuisine));
+    assertTrue(cuisinesRegistry.customerCuisines(customer1).contains(germanCuisine));
+  }
+
+  @Test
+  public void givenRegisteredCuisinesAndCustomers_whenRetrievingCuisinesOfInvalidCustomer_thenHandleWarning() {
+
+    Customer customer1 = new Customer(UUID.randomUUID());
+    Customer customer2 = new Customer(UUID.randomUUID());
+    Cuisine frenchCuisine = new Cuisine(CuisinesEnum.FRENCH);
+    Cuisine germanCuisine = new Cuisine(CuisinesEnum.GERMAN);
+
+    cuisinesRegistry.register(customer1, frenchCuisine);
+    cuisinesRegistry.register(customer1, germanCuisine);
+    cuisinesRegistry.register(customer2, frenchCuisine);
+
+    assertEquals(0, cuisinesRegistry.customerCuisines(null).size());
+    assertEquals(0, cuisinesRegistry.customerCuisines(new Customer()).size());
+  }
+
+  @Test
+  public void givenSeveralRegisteredCustomersAndCuisines_whenRetrievingTopNCuisines_thenReturnSuccessfullyCuisineWithMostCustomers() {
+
+    Customer customer1 = new Customer(UUID.randomUUID());
+    Customer customer2 = new Customer(UUID.randomUUID());
+    Cuisine frenchCuisine = new Cuisine(CuisinesEnum.FRENCH);
+    Cuisine germanCuisine = new Cuisine(CuisinesEnum.GERMAN);
+
+    cuisinesRegistry.register(customer1, frenchCuisine);
+    cuisinesRegistry.register(customer1, germanCuisine);
+    cuisinesRegistry.register(customer2, frenchCuisine);
+
+    assertEquals(2, cuisinesRegistry.topCuisines(5).size());
+    assertEquals(frenchCuisine, cuisinesRegistry.topCuisines(2).get(0));
+    assertEquals(germanCuisine, cuisinesRegistry.topCuisines(2).get(1));
+  }
 
 
 }

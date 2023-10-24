@@ -2,13 +2,13 @@ package de.quandoo.recruitment.registry.model;
 
 public class Cuisine {
 
-  private final String name;
+  private final CuisinesEnum name;
 
-  public Cuisine(final String name) {
+  public Cuisine(final CuisinesEnum name) {
     this.name = name;
   }
 
-  public String getName() {
+  public CuisinesEnum getName() {
     return name;
   }
 
